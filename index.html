@@ -231,6 +231,27 @@
     50%{ box-shadow:0 0 0 8px rgba(255,181,71,0); }
   }
 
+  /* ---------- 疊加字卡：用來蓋住並取代影片原本燒錄的字卡文字 ---------- */
+  .caption-overlay{
+    position:absolute;
+    left:10px; right:10px; bottom:14px;
+    z-index:8;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:9px 16px;
+    border-radius:6px;
+    background:#1b3a6b;
+    border:1px solid rgba(255,255,255,.15);
+    box-shadow:0 6px 16px rgba(0,0,0,.35);
+    font-family:var(--sans);
+    font-size:12.5px;
+    font-weight:600;
+    color:#eaf2f6;
+    text-align:center;
+    line-height:1.5;
+  }
+
   /* ---------- 互動決策層 ---------- */
   .decision-layer{
     position:absolute; inset:0;
@@ -662,6 +683,8 @@
         <span class="sound-text">點擊開啟聲音</span>
       </button>
 
+      <div class="caption-overlay" id="captionOverlay" style="display:none;"></div>
+
       <div class="decision-layer" id="decisionLayer">
         <div class="decision-alert">偵測到異常 · 系統回應已中止</div>
         <div class="decision-title" id="decisionTitle">畫面出現異常，你會怎麼做？</div>
@@ -839,6 +862,11 @@ const SCENARIOS = [
     hudLabel: "LIVE · 醫工課辦公室",
     heroTitle: '規定寫得清清楚楚。<br>但<span class="accent">通報時效</span>，你會照做嗎？',
     heroDesc: "資安事件不是只有拔線、斷網就結束，通報時效、通報內容、後續處理，每一步都是規定的一部分。這一關有三個接連的決策點，任何一題答錯都必須重新作答該段落才能繼續。",
+    // 疊加字卡：蓋掉影片原本在約8.5秒燒錄的「立即通知原廠」字卡，
+    // 換成新文字。from 是開始顯示的秒數，直接對應影片本身字卡出現的時間點。
+    captions: [
+      { from: 8.5, text: "立刻請你通知原廠，我來負責通知資訊室" }
+    ],
     checkpoints: [
       {
         segStart: 0,
@@ -930,36 +958,44 @@ const SCENARIOS = [
       {
         segStart: 4.6,
         time: 8.3,
-        title: "確認事件後，下一步該怎麼處理？",
+        title: "確認事件後，下一步該怎麼處理？（複選，請選出所有你會採取的行動）",
+        multiSelect: true,
         options: [
           {
             key: "A",
             label: "通報原廠並進行後續全面檢查",
             sub: "聯繫設備原廠，同時安排完整的系統檢查。",
-            verdict: "good",
-            resultTag: "應變正確",
-            resultTitle: "通報原廠並徹查，風險有效控管",
-            resultBody: "聯繫原廠並同步進行全面檢查，能確認設備是否確實遭到入侵、影響範圍有多大，也能取得原廠端的專業支援，避免同樣的漏洞在其他設備上重演。"
+            verdict: "good"
           },
           {
             key: "B",
             label: "反正沒造成損失就算了",
             sub: "既然目前看起來沒有實際損失，就不用再深究。",
-            verdict: "bad",
-            resultTag: "檢查未落實",
-            resultTitle: "資安出現漏洞，醫院有被入侵可能性",
-            resultLog: [
-              "VENDOR NOTIFICATION: <span>SKIPPED</span>",
-              "FULL INSPECTION: <span>NOT PERFORMED</span>",
-              "HIDDEN COMPROMISE: <span>POSSIBLE</span>",
-              "RISK LEVEL: <span>ELEVATED</span>"
-            ],
-            resultBody: "「目前沒有損失」不代表沒有被入侵，許多攻擊在初期不會立即造成明顯影響。跳過原廠通報與全面檢查，等於放任潛藏的風險繼續存在，之後一旦爆發，處理難度會遠比現在更高。"
+            verdict: "bad"
+          },
+          {
+            key: "C",
+            label: "偕同醫工課通知資訊室",
+            sub: "同步讓資訊室掌握狀況，共同處理後續應變。",
+            verdict: "good"
           }
         ],
+        // 複選題答錯（少選、多選、或選到錯誤選項）統一顯示這則結果文案
+        wrongResult: {
+          verdict: "bad",
+          resultTag: "檢查未落實",
+          resultTitle: "資安出現漏洞，醫院有被入侵可能性",
+          resultLog: [
+            "VENDOR NOTIFICATION: <span>INCOMPLETE</span>",
+            "IT DEPT NOTIFICATION: <span>INCOMPLETE</span>",
+            "FULL INSPECTION: <span>NOT CONFIRMED</span>",
+            "RISK LEVEL: <span>ELEVATED</span>"
+          ],
+          resultBody: "「目前沒有損失」不代表沒有被入侵，許多攻擊在初期不會立即造成明顯影響。通報原廠、同步讓資訊室掌握狀況，兩件事缺一不可——只做其中一件，或跳過通報只想著沒事就好，都等於放任潛藏的風險繼續存在。"
+        },
         briefPoints: [
-          { mark:"→", tone:"correct", title:"建議做法：通報原廠並進行全面檢查，別因為沒損失就結案", body:"入侵是否造成損失與是否曾經發生是兩件事。通報原廠、完整檢查，才能真正確認風險是否已排除。" },
-          { mark:"→", tone:"wrong", title:"常見誤區：沒看到損失就當作沒事", body:"許多攻擊初期不會有明顯徵兆，略過原廠通報與全面檢查，等於讓潛藏風險繼續留在系統裡。" }
+          { mark:"→", tone:"correct", title:"建議做法：通報原廠＋通知資訊室，兩者缺一不可", body:"入侵是否造成損失與是否曾經發生是兩件事。通報原廠確認設備狀況、同步讓資訊室掌握事件全貌，兩項行動並行才能真正確認風險是否已排除。" },
+          { mark:"→", tone:"wrong", title:"常見誤區：沒看到損失就當作沒事，或只做了其中一步", body:"許多攻擊初期不會有明顯徵兆，略過原廠通報或資訊室通知任何一項，都等於讓潛藏風險繼續留在系統裡，沒有真正被排查。" }
         ]
       }
     ]
@@ -1074,6 +1110,7 @@ const SCENARIOS = [
   const finaleCorrect = document.getElementById('finaleCorrect');
   const btnRestartAll = document.getElementById('btnRestartAll');
   const soundPrompt = document.getElementById('soundPrompt');
+  const captionOverlay = document.getElementById('captionOverlay');
 
   let soundUnlocked = false; // 使用者是否已手動解鎖聲音（瀏覽器政策限制自動播放帶聲音的媒體）
 
@@ -1169,6 +1206,7 @@ const SCENARIOS = [
     btnNext.style.display = '';
     btnRetry.classList.remove('primary');
     btnRetry.classList.add('retry');
+    captionOverlay.style.display = 'none';   // 重播區段時先隱藏字卡，timeupdate 會依時間重新判斷是否顯示
 
     video.currentTime = startTime;
     stateLabel.textContent = '播放中';
@@ -1195,6 +1233,20 @@ const SCENARIOS = [
     const cp = s.checkpoints[cpIndex];
     if(!decisionShown && cp && video.currentTime >= cp.time){
       showDecision();
+    }
+
+    // 疊加字卡：時間到了就蓋上去取代影片原本的字卡文字；
+    // 若目前播放位置在字卡起始時間之前（例如重播某段），就收回字卡。
+    if(s.captions && s.captions.length){
+      const activeCaption = s.captions
+        .filter(c => video.currentTime >= c.from)
+        .sort((a, b) => b.from - a.from)[0];
+      if(activeCaption){
+        captionOverlay.textContent = activeCaption.text;
+        captionOverlay.style.display = 'flex';
+      } else {
+        captionOverlay.style.display = 'none';
+      }
     }
   });
 
