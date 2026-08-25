@@ -38,6 +38,109 @@
     padding:32px 16px 80px;
   }
 
+  /* ---------- 登入畫面 ---------- */
+  .login-screen{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(31,138,94,.12), transparent 55%),
+      radial-gradient(ellipse at 80% 80%, rgba(255,181,71,.08), transparent 50%),
+      var(--void);
+  }
+  .login-screen.hidden{ display:none; }
+
+  .login-card{
+    width:100%;
+    max-width:420px;
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-radius:12px;
+    padding:36px 32px;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,.7);
+  }
+
+  .login-tag{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.16em;
+    color:var(--ok-green);
+    text-transform:uppercase;
+    margin-bottom:16px;
+  }
+  .login-tag::before{ content:"● "; }
+
+  .login-title{
+    font-size:clamp(20px,4vw,26px);
+    font-weight:700;
+    line-height:1.4;
+    margin-bottom:12px;
+  }
+
+  .login-desc{
+    font-size:13px;
+    color:var(--text-mid);
+    line-height:1.7;
+    margin-bottom:26px;
+  }
+
+  .login-form{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  .login-field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .login-field span{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.06em;
+    color:var(--text-mid);
+  }
+  .login-field input{
+    font-family:var(--sans);
+    font-size:14px;
+    color:var(--text-hi);
+    background:rgba(255,255,255,.03);
+    border:1px solid var(--panel-line);
+    border-radius:6px;
+    padding:11px 13px;
+    outline:none;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .login-field input:focus{
+    border-color:var(--ok-green);
+    background:rgba(62,242,160,.04);
+  }
+  .login-field input::placeholder{ color:var(--text-dim); }
+
+  .login-submit{
+    margin-top:6px;
+    width:100%;
+    padding:13px;
+    font-size:13px;
+  }
+
+  .login-error{
+    margin-top:14px;
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:#ffb9c0;
+    background:rgba(255,77,94,.08);
+    border:1px solid rgba(255,77,94,.35);
+    border-radius:6px;
+    padding:10px 13px;
+    text-align:center;
+  }
+
   /* ---------- 頂部標頭 ---------- */
   .masthead{
     width:100%;
@@ -600,6 +703,20 @@
   }
   .finale .score b{ color:var(--ok-green); font-size:18px; }
 
+  .finale-actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .finale-note{
+    margin-top:16px;
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--text-dim);
+  }
+  .finale-note.sent{ color:var(--ok-green); }
+
   /* ---------- 教學重點區（依當前關卡動態顯示）---------- */
   .brief{
     width:100%;
@@ -653,6 +770,32 @@
 </style>
 </head>
 <body>
+
+  <!-- ===================== 登入畫面 ===================== -->
+  <div class="login-screen" id="loginScreen">
+    <div class="login-card">
+      <div class="login-tag">資安事件應變演練 · 測驗登入</div>
+      <h1 class="login-title">開始測驗前，<br>請先留下你的資料</h1>
+      <p class="login-desc">完成四關演練後，系統會記錄你的作答狀況。請如實填寫，測驗結束後可自行寄送完成通知。</p>
+
+      <form id="loginForm" class="login-form">
+        <label class="login-field">
+          <span>姓名</span>
+          <input type="text" id="inputName" required placeholder="請輸入姓名" autocomplete="name">
+        </label>
+        <label class="login-field">
+          <span>公司 / 單位</span>
+          <input type="text" id="inputCompany" required placeholder="請輸入公司或單位名稱" autocomplete="organization">
+        </label>
+        <label class="login-field">
+          <span>Email</span>
+          <input type="email" id="inputEmail" required placeholder="請輸入 Email" autocomplete="email">
+        </label>
+        <button type="submit" class="btn primary login-submit">開始測驗</button>
+      </form>
+      <div class="login-error" id="loginError" style="display:none;">請完整填寫姓名、公司與有效的 Email</div>
+    </div>
+  </div>
 
   <header class="masthead">
     <span class="tag">資安事件應變演練</span>
@@ -718,7 +861,11 @@
     <div class="tag">演練完成</div>
     <h2>全部 <span id="finaleTotal">1</span> 個情境已完成</h2>
     <div class="score">正確應變 <b id="finaleCorrect">0</b> / <span id="finaleTotal2">1</span></div>
-    <button class="btn primary" id="btnRestartAll">從第 1 關重新演練</button>
+    <div class="finale-actions">
+      <button class="btn primary" id="btnSendEmail">寄送完成通知信</button>
+      <button class="btn retry" id="btnRestartAll">從第 1 關重新演練</button>
+    </div>
+    <div class="finale-note" id="finaleNote">點擊「寄送完成通知信」，用你的 Gmail 寄出完成通知</div>
   </div>
 
   <section class="brief" id="briefSection">
@@ -1135,6 +1282,14 @@ const SCENARIOS = [
   let selectedKeys = new Set();  // 複選題目前已勾選的選項 key
   const results = new Array(TOTAL).fill(null); // 每一關「整體」是否過關：'good' | 'bad' | null
 
+  // 重考次數記錄：retryCounts[關卡索引][checkpoint索引] = 該題答錯重測了幾次
+  // 用來作為情報面板的參考指標（次數越少代表越熟悉規範）
+  const retryCounts = SCENARIOS.map(s => new Array(s.checkpoints.length).fill(0));
+
+  // 測試者身份資訊，登入後才會填入
+  let learnerInfo = { name: '', company: '', email: '' };
+  const startTime = new Date();
+
   function fmt(t){
     const m = Math.floor(t/60).toString().padStart(2,'0');
     const s = Math.floor(t%60).toString().padStart(2,'0');
@@ -1329,6 +1484,7 @@ const SCENARIOS = [
       }
     } else {
       // 答錯：整關判定失敗，顯示結果畫面，只能重播「這個 checkpoint 自己的段落」
+      retryCounts[current][cpIndex] += 1;   // 記錄這一題重考次數，供情報面板參考
       results[current] = 'bad';
       refreshDots();
       stateLabel.textContent = '應變未通過';
@@ -1355,6 +1511,7 @@ const SCENARIOS = [
       }
       video.play();
     } else {
+      retryCounts[current][cpIndex] += 1;   // 記錄這一題重考次數，供情報面板參考
       results[current] = 'bad';
       refreshDots();
       stateLabel.textContent = '應變未通過';
@@ -1453,7 +1610,104 @@ const SCENARIOS = [
     finaleTotal.textContent = TOTAL;
     finaleTotal2.textContent = TOTAL;
     finaleCorrect.textContent = correctCount;
+
+    submitToGoogleForm();   // 完成當下就自動把重考次數等資料送進情報面板，不需要使用者額外動作
   }
+
+  // 把姓名/公司/Email/各關重考次數/完成時間送進 Google 表單，
+  // 表單會自動彙整進對應的 Google 試算表，管理者隨時打開試算表就能看到所有人的結果。
+  //
+  // 用「隱藏 iframe + 表單 target」的方式送出，而不是用 fetch，
+  // 是因為 Google 表單的送出端點不允許跨網域直接讀取回應（no-cors 限制），
+  // 用原生表單送出可以繞過這個限制，即使看不到回應也能確保資料送達。
+  const GOOGLE_FORM_ACTION = 'https://docs.google.com/forms/d/e/1FAIpQLSeK73BodPo8X2t__GvvOtcuEs4Po-UmntztWHO0i_YSJw-YGw/formResponse';
+  const GOOGLE_FORM_ENTRIES = {
+    name: 'entry.693859051',
+    company: 'entry.2064044710',
+    email: 'entry.1147737763',
+    scenario1Retry: 'entry.685164554',
+    scenario2Retry: 'entry.1725002064',
+    scenario3Q1Retry: 'entry.454428424',
+    scenario3Q2Retry: 'entry.1979674176',
+    scenario3Q3Retry: 'entry.1405083025',
+    scenario4Retry: 'entry.1756191457',
+    finishTime: 'entry.1415443966'
+  };
+
+  let formSubmitted = false;   // 避免重複送出（例如使用者按了兩次「從頭重新演練」又完成一次）
+
+  function submitToGoogleForm(){
+    if(formSubmitted) return;
+    formSubmitted = true;
+
+    const finishTimeStr = new Date().toLocaleString('zh-TW', { hour12:false });
+
+    const values = {
+      [GOOGLE_FORM_ENTRIES.name]: learnerInfo.name,
+      [GOOGLE_FORM_ENTRIES.company]: learnerInfo.company,
+      [GOOGLE_FORM_ENTRIES.email]: learnerInfo.email,
+      [GOOGLE_FORM_ENTRIES.scenario1Retry]: String(retryCounts[0][0]),
+      [GOOGLE_FORM_ENTRIES.scenario2Retry]: String(retryCounts[1][0]),
+      [GOOGLE_FORM_ENTRIES.scenario3Q1Retry]: String(retryCounts[2][0]),
+      [GOOGLE_FORM_ENTRIES.scenario3Q2Retry]: String(retryCounts[2][1]),
+      [GOOGLE_FORM_ENTRIES.scenario3Q3Retry]: String(retryCounts[2][2]),
+      [GOOGLE_FORM_ENTRIES.scenario4Retry]: String(retryCounts[3][0]),
+      [GOOGLE_FORM_ENTRIES.finishTime]: finishTimeStr
+    };
+
+    // 建立一個隱藏 iframe 當作表單送出目標，避免頁面因送出表單而跳轉離開
+    let iframe = document.getElementById('formTargetFrame');
+    if(!iframe){
+      iframe = document.createElement('iframe');
+      iframe.name = 'formTargetFrame';
+      iframe.id = 'formTargetFrame';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+    }
+
+    const form = document.createElement('form');
+    form.action = GOOGLE_FORM_ACTION;
+    form.method = 'POST';
+    form.target = 'formTargetFrame';
+    form.style.display = 'none';
+
+    Object.entries(values).forEach(([entryName, val]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = entryName;
+      input.value = val;
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  }
+
+  // 「寄送完成通知信」：開啟使用者自己的 Gmail 撰寫畫面，預先帶入主旨與內容，
+  // 使用者只需要按送出，不需要額外輸入任何文字。
+  const NOTIFY_EMAIL_TO = 'ch3804@chgh.org.tw';   // 固定寄給管理者信箱，測試者不需要自己填收件人
+  const btnSendEmail = document.getElementById('btnSendEmail');
+  const finaleNote = document.getElementById('finaleNote');
+
+  btnSendEmail.addEventListener('click', () => {
+    const correctCount = results.filter(r => r === 'good').length;
+    const subject = `[資安演練完成通知] ${learnerInfo.name}（${learnerInfo.company}）`;
+    const body =
+`姓名：${learnerInfo.name}
+公司：${learnerInfo.company}
+Email：${learnerInfo.email}
+完成關卡：${correctCount} / ${TOTAL}
+完成時間：${new Date().toLocaleString('zh-TW', { hour12:false })}
+
+以上為資安事件應變演練完成通知，由系統自動產生郵件草稿。`;
+
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(NOTIFY_EMAIL_TO)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(gmailUrl, '_blank');
+
+    finaleNote.textContent = '已為你開啟 Gmail 草稿，請確認內容後按送出';
+    finaleNote.classList.add('sent');
+  });
 
   btnRestartAll.addEventListener('click', () => {
     finale.classList.remove('active');
@@ -1462,6 +1716,10 @@ const SCENARIOS = [
     document.querySelector('.controls').style.display = '';
     document.getElementById('heroSection').style.display = '';
     results.fill(null);
+    retryCounts.forEach(arr => arr.fill(0));
+    formSubmitted = false;
+    finaleNote.textContent = '點擊「寄送完成通知信」，用你的 Gmail 寄出完成通知';
+    finaleNote.classList.remove('sent');
     current = 0;
     loadScenario(0);
   });
@@ -1477,9 +1735,36 @@ const SCENARIOS = [
   }
   soundPrompt.addEventListener('click', unlockSound);
 
-  // 初始化
+  // ---------- 登入表單 ----------
+  const loginScreen = document.getElementById('loginScreen');
+  const loginForm = document.getElementById('loginForm');
+  const loginError = document.getElementById('loginError');
+  const inputName = document.getElementById('inputName');
+  const inputCompany = document.getElementById('inputCompany');
+  const inputEmail = document.getElementById('inputEmail');
+
+  loginForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = inputName.value.trim();
+    const company = inputCompany.value.trim();
+    const email = inputEmail.value.trim();
+    const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    if(!name || !company || !emailValid){
+      loginError.style.display = 'block';
+      return;
+    }
+
+    loginError.style.display = 'none';
+    learnerInfo = { name, company, email };
+    loginScreen.classList.add('hidden');
+
+    // 登入完成才真正開始播放第一關，避免測試者身份資料還沒填就開始計入重考次數
+    loadScenario(0);
+  });
+
+  // 初始化：先建立進度點，但影片要等登入完成後才開始播放
   buildDots();
-  loadScenario(0);
 })();
 </script>
 
