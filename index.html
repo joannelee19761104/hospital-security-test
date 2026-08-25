@@ -331,6 +331,44 @@
     letter-spacing:.04em;
   }
 
+  /* ---------- 複選題（checkbox 樣式選項＋送出按鈕） ---------- */
+  .decision-btn.multi{ user-select:none; }
+  .decision-btn.multi .k{ display:flex; align-items:center; }
+  .decision-btn.multi .chk{
+    display:inline-block;
+    width:13px; height:13px;
+    border:1px solid var(--text-dim);
+    border-radius:3px;
+    margin-right:7px;
+    position:relative;
+    flex-shrink:0;
+    transition:all .15s ease;
+  }
+  .decision-btn.multi.selected{
+    border-color:var(--ok-green);
+    background:rgba(62,242,160,.09);
+  }
+  .decision-btn.multi.selected .chk{
+    background:var(--ok-green);
+    border-color:var(--ok-green);
+  }
+  .decision-btn.multi.selected .chk::after{
+    content:"";
+    position:absolute;
+    left:3px; top:1px;
+    width:4px; height:7px;
+    border-right:2px solid #04170f;
+    border-bottom:2px solid #04170f;
+    transform:rotate(40deg);
+  }
+  .decision-submit-btn{
+    margin-top:4px;
+  }
+  .decision-submit-btn[disabled]{
+    opacity:.45;
+    cursor:not-allowed;
+  }
+
   /* ---------- 結果層（依 verdict 套色：good / warn / bad） ---------- */
   .result-layer{
     position:absolute; inset:0;
@@ -606,7 +644,7 @@
         <div class="decision-alert">偵測到異常 · 系統回應已中止</div>
         <div class="decision-title" id="decisionTitle">畫面出現異常，你會怎麼做？</div>
         <div class="decision-options" id="decisionOptions"></div>
-        <div class="decision-hint">影片已暫停，請點選其中一個選項以繼續</div>
+        <div class="decision-hint" id="decisionHint">影片已暫停，請點選其中一個選項以繼續</div>
       </div>
 
       <div class="result-layer" id="resultLayer">
@@ -747,6 +785,44 @@ const SCENARIOS = [
       { mark:"→", tone:"correct", title:"建議做法：斷線後立刻通報，別急著重啟", body:"拔線只是暫時阻斷攻擊路徑，實際入侵範圍與是否已被植入後門仍需專業排查。第一時間通報護理站與資安窗口，能讓後續處理更完整、也能同步啟動備援機制。" },
       { mark:"→", tone:"wrong", title:"常見誤區：斷線後就當作沒事，直接重啟", body:"斷線不等於清除威脅。未經查明就重啟系統，等於讓可能殘留的惡意程式有機會再次連線或發作，也讓資安團隊失去完整還原事件的機會。" }
     ]
+  },
+
+  {
+    video: "video-03.mp4",
+    hudLabel: "LIVE · WARD-07",
+    heroTitle: '維修途中，工程師看到了病人的<br><span class="accent">診斷證明書</span>。',
+    heroDesc: "外部維修人員在檢修設備時，經常會不小心接觸到病患的病歷、報告等敏感資料。這些都不屬於他的工作範圍——請選出所有正確的應對原則（複選）。",
+    decisionTime: 4.6,
+    multiSelect: true,
+    decisionTitle: "工程師拿起了病人的診斷證明書——這時候，正確的做法有哪些？（複選，請選出所有正確答案）",
+    options: [
+      { key:"A", label:"大明星耶，看一下沒關係", sub:"覺得病人是知名人士，好奇看一下應該無妨。", correct:false },
+      { key:"B", label:"病人隱私不能看", sub:"未經授權不得檢視病患的病歷、診斷證明等資料。", correct:true },
+      { key:"C", label:"拍照一下跟朋友八卦", sub:"拍下畫面傳給朋友當聊天話題。", correct:false },
+      { key:"D", label:"病人隱私不能聽", sub:"不得談論、複述病患的病情或個人資料。", correct:true },
+      { key:"E", label:"病人隱私不拍照", sub:"不得使用手機或任何裝置拍攝病患資料。", correct:true },
+      { key:"F", label:"病人隱私不外傳", sub:"不得將病患資料轉傳、分享給任何第三人。", correct:true }
+    ],
+    correctResult: {
+      resultTag: "應變正確",
+      resultTitle: "正確保護病人隱私",
+      resultBody: "你正確選出了病人隱私保護的四不原則：不能看、不能聽、不能拍照、不能外傳。無論是不是知名人士，任何非治療需要的人員（包含外部工程師、廠商）都不得檢視、討論、拍攝或傳送病患的病歷與診斷資料。"
+    },
+    wrongResult: {
+      resultTag: "違反個人隱私",
+      resultTitle: "已違反病人隱私規範",
+      resultLog: [
+        "PATIENT RECORD ACCESS: <span>UNAUTHORIZED</span>",
+        "PRIVACY POLICY: <span>VIOLATED</span>",
+        "HOSPITAL LIABILITY: <span>CONFIRMED</span>",
+        "ACCOUNTABILITY: <span>RECOVERY CLAIM PENDING</span>"
+      ],
+      resultBody: "少選、選錯或多選都代表未能完整遵守病人隱私的四不原則。任何檢視、談論、拍攝或外傳病患診斷資料的行為，都已違反個人隱私，將造成醫院損失，醫院有權就此向相關人員追償。"
+    },
+    briefPoints: [
+      { mark:"→", tone:"correct", title:"建議做法：病人資料四不原則", body:"不看、不聽、不拍照、不外傳——任何非治療需要的人員，包含外部工程師、廠商，都不得檢視、討論、拍攝或傳送病患的病歷、診斷證明等隱私資料。" },
+      { mark:"→", tone:"wrong", title:"常見誤區：好奇心作祟、隨手拍照分享", body:"即使沒有惡意，只是「看一下」、「拍照跟朋友聊聊」，都已構成個資外洩風險。一旦流出將造成醫院法律責任與商譽損失，當事人也可能面臨追償與懲處。" }
+    ]
   }
 ];
 
@@ -779,6 +855,7 @@ const SCENARIOS = [
   const stageDots = document.getElementById('stageDots');
   const heroTitle = document.getElementById('heroTitle');
   const heroDesc = document.getElementById('heroDesc');
+  const decisionHint = document.getElementById('decisionHint');
   const briefList = document.getElementById('briefList');
   const finale = document.getElementById('finale');
   const finaleTotal = document.getElementById('finaleTotal');
@@ -862,13 +939,33 @@ const SCENARIOS = [
 
     // 建立本關選項按鈕
     decisionOptions.innerHTML = '';
-    s.options.forEach(opt => {
-      const btn = document.createElement('button');
-      btn.className = 'decision-btn';
-      btn.innerHTML = `<span class="k">選項 ${opt.key}</span><span class="label">${opt.label}</span><span class="sub">${opt.sub || ''}</span>`;
-      btn.addEventListener('click', () => chooseOption(opt));
-      decisionOptions.appendChild(btn);
-    });
+    if(s.multiSelect){
+      // 複選題：點選只切換勾選狀態，不會立即送出
+      s.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'decision-btn multi';
+        btn.dataset.key = opt.key;
+        btn.innerHTML = `<span class="k"><span class="chk"></span>選項 ${opt.key}</span><span class="label">${opt.label}</span><span class="sub">${opt.sub || ''}</span>`;
+        btn.addEventListener('click', () => btn.classList.toggle('selected'));
+        decisionOptions.appendChild(btn);
+      });
+      decisionHint.innerHTML = '';
+      const submitBtn = document.createElement('button');
+      submitBtn.type = 'button';
+      submitBtn.className = 'btn primary decision-submit-btn';
+      submitBtn.textContent = '送出答案';
+      submitBtn.addEventListener('click', () => submitMultiAnswer(s));
+      decisionHint.appendChild(submitBtn);
+    } else {
+      s.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'decision-btn';
+        btn.innerHTML = `<span class="k">選項 ${opt.key}</span><span class="label">${opt.label}</span><span class="sub">${opt.sub || ''}</span>`;
+        btn.addEventListener('click', () => chooseOption(opt));
+        decisionOptions.appendChild(btn);
+      });
+      decisionHint.textContent = '影片已暫停，請點選其中一個選項以繼續';
+    }
     decisionTitle.textContent = s.decisionTitle || '';
 
     video.play().catch(() => {
@@ -926,6 +1023,39 @@ const SCENARIOS = [
     } else {
       stateLabel.textContent = '演練中止';
       setTimeout(() => showResult(opt), 450);
+    }
+  }
+
+  function submitMultiAnswer(s){
+    const submitBtn = decisionHint.querySelector('.decision-submit-btn');
+    const selectedBtns = Array.from(decisionOptions.querySelectorAll('.decision-btn.multi.selected'));
+    if(selectedBtns.length === 0){
+      if(submitBtn) submitBtn.classList.add('retry');
+      return; // 至少要選一個才能送出
+    }
+    if(submitBtn) submitBtn.classList.remove('retry');
+    const selectedKeys = selectedBtns.map(b => b.dataset.key).sort();
+    const correctKeys = s.options.filter(o => o.correct).map(o => o.key).sort();
+    const isCorrect = selectedKeys.length === correctKeys.length &&
+                       selectedKeys.every((k,i) => k === correctKeys[i]);
+
+    const base = isCorrect ? s.correctResult : s.wrongResult;
+    const pseudoOpt = Object.assign({
+      verdict: isCorrect ? 'good' : 'bad',
+      continuePlay: true
+    }, base);
+
+    chosenOption = pseudoOpt;
+    results[current] = pseudoOpt.verdict;
+    hideDecision();
+    refreshDots();
+
+    if(pseudoOpt.continuePlay){
+      stateLabel.textContent = '繼續播放…';
+      video.play();
+    } else {
+      stateLabel.textContent = '演練中止';
+      setTimeout(() => showResult(pseudoOpt), 450);
     }
   }
 
