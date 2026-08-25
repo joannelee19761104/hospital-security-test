@@ -804,11 +804,13 @@ const SCENARIOS = [
       { key:"F", label:"病人隱私不外傳", sub:"不得將病患資料轉傳、分享給任何第三人。", correct:true }
     ],
     correctResult: {
+      continuePlay: true,   // 全對：繼續播放影片到結束，再顯示結果
       resultTag: "應變正確",
       resultTitle: "正確保護病人隱私",
       resultBody: "你正確選出了病人隱私保護的四不原則：不能看、不能聽、不能拍照、不能外傳。無論是不是知名人士，任何非治療需要的人員（包含外部工程師、廠商）都不得檢視、討論、拍攝或傳送病患的病歷與診斷資料。"
     },
     wrongResult: {
+      continuePlay: false,  // 少選、多選或選錯：送出當下影片維持暫停，立即顯示結果
       resultTag: "違反個人隱私",
       resultTitle: "已違反病人隱私規範",
       resultLog: [
