@@ -1531,12 +1531,8 @@ const SCENARIOS = [
     resultTitle.textContent = opt.resultTitle || '';
     resultBody.textContent = opt.resultBody || '';
 
-    if(opt.resultLog && opt.resultLog.length){
-      resultLog.style.display = 'block';
-      resultLog.innerHTML = opt.resultLog.map(line => '&gt; ' + line).join('<br>');
-    } else {
-      resultLog.style.display = 'none';
-    }
+    // 答錯結果畫面不顯示模擬終端機log卡片，只保留中文標題與說明文字
+    resultLog.style.display = 'none';
 
     // 答錯：只顯示「重新演練這一段」，不給下一關／繼續的機會
     btnNext.style.display = 'none';
